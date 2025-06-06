@@ -1,14 +1,33 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import api from "../../api/axios"; // import from centralized axios instance
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Admin login with", { email, password });
+    try {
+      const res = await api.post("/auth/login", {
+        email,
+        password,
+        role: "admin",
+      });
+
+      // Store token or admin info in localStorage if needed
+      localStorage.setItem("adminToken", res.data.token);
+
+      // Redirect to admin dashboard
+      navigate("/admin/dashboard");
+    } catch (err) {
+      alert(
+        "Login failed: " + (err.response?.data?.message || "Unknown error")
+      );
+    }
   };
 
   return (
