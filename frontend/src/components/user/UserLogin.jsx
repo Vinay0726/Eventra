@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+import api from "../../api/axios";
 
-const UserLogin = () => {
+export default function UserLogin({ onClose }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,27 +12,34 @@ const UserLogin = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
 
     try {
-      const res = await axios.post("/api/login", { email, password });
-      const { user, token } = res.data;
+      const res = await api.post("/auth/login", {
+        email,
+        password,
+        role: "user",
+      });
 
-      localStorage.setItem("eventra_user", JSON.stringify({ ...user, token }));
+      localStorage.setItem("userToken", res.data.token);
 
-      if (user.role === "organizer") navigate("/organizer/dashboard");
-      else if (user.role === "user") navigate("/user/dashboard");
-      else setError("Unknown role");
+      // Close the modal after successful login
+      if (onClose) onClose();
+
+      // Redirect after modal closes
+      navigate("/");
     } catch (err) {
-      setError("Invalid email or password");
+      setError(err.response?.data?.message || "Invalid email or password");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-2 p-6 ">
-      <h2 className="text-3xl font-bold text-center text-green-600 mb-6">
-        Login to Eventra
+    <div className="max-w-md mx-auto mt-2 p-6">
+      <h2 className="text-3xl font-bold text-center text-blue-600 mb-6">
+        User Login
       </h2>
       <form onSubmit={handleLogin} className="space-y-5">
+        {/* Email */}
         <div>
           <label className="block text-sm mb-1 text-gray-700">Email</label>
           <div className="flex items-center border rounded px-3 py-2 bg-gray-50">
@@ -48,6 +55,7 @@ const UserLogin = () => {
           </div>
         </div>
 
+        {/* Password */}
         <div>
           <label className="block text-sm mb-1 text-gray-700">Password</label>
           <div className="flex items-center border rounded px-3 py-2 bg-gray-50">
@@ -73,11 +81,13 @@ const UserLogin = () => {
           </div>
         </div>
 
+        {/* Error */}
         {error && <p className="text-red-500 text-center text-sm">{error}</p>}
 
+        {/* Submit */}
         <button
           type="submit"
-          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
         >
           Login
         </button>
@@ -86,7 +96,7 @@ const UserLogin = () => {
       <p className="text-sm text-center mt-4 text-gray-600">
         Don’t have an account?{" "}
         <span
-          className="text-green-600 cursor-pointer hover:underline"
+          className="text-blue-600 cursor-pointer hover:underline"
           onClick={() => navigate("/user/register")}
         >
           Register
@@ -94,6 +104,4 @@ const UserLogin = () => {
       </p>
     </div>
   );
-};
-
-export default UserLogin;
+}

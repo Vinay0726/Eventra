@@ -1,43 +1,38 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/user/Navbar";
-import Hero from "./components/user/Hero";
-import Features from "./components/user/Features";
-import Contact from "./components/user/Contact";
+
 import Footer from "./components/user/Footer";
 import AdminLogin from "./components/admin/AdminLogin";
-import UserRegister from "./components/user/UserRegister";
-import OrganizerLogin from "./components/organizer/OrganizerLogin";
-import UserLogin from "./components/user/UserLogin";
-import OrganizerRegister from "./components/organizer/OrganizerRegister";
+
+import HomePage from "./components/user/HomePage";
+import AdminDashboard from "./components/admin/AdminDashboard";
+import OrganizerDashboard from "./components/organizer/OrganizerDashboard";
 
 const App = () => {
+  const location = useLocation();
+
+  // Check if current path is under /admin
+  const isAdminPath = location.pathname.startsWith("/admin");
   return (
     <div className="font-sans">
+      {!isAdminPath && <Navbar />}
       <Routes>
-        <Route
-          path="/"
-          element={
-            <>
-              <Navbar />
-              <Hero />
-              <Features />
-              <Contact />
-              <Footer />
-            </>
-          }
-        />
+        <Route path="/" element={<HomePage />} />
 
         {/* User Auth */}
-        <Route path="/user/login" element={<UserLogin />} />
-        <Route path="/user/register" element={<UserRegister />} />
+        <Route path="/user/login" element={<HomePage />} />
+        <Route path="/user/register" element={<HomePage />} />
 
         {/* Organizer Auth */}
-        <Route path="/organizer/login" element={<OrganizerLogin />} />
-        <Route path="/organizer/register" element={<OrganizerRegister />} />
+        <Route path="/organizer/login" element={<HomePage />} />
+        <Route path="/organizer/register" element={<HomePage />} />
+        <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />
 
         {/* admin */}
-        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/adminLogin" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
       </Routes>
+      {!isAdminPath && <Footer />}
     </div>
   );
 };

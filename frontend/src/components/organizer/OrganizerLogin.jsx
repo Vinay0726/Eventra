@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+import api from "../../api/axios"; // centralized axios instance
 
-const OrganizerLogin = () => {
+export default function OrganizerLogin() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,34 +12,40 @@ const OrganizerLogin = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError(""); // clear previous error
 
     try {
-      const res = await axios.post("/api/login", { email, password });
-      const { user, token } = res.data;
+      // Send role explicitly like AdminLogin
+      const res = await api.post("/auth/login", {
+        email,
+        password,
+        role: "organizer",
+      });
 
-      localStorage.setItem("eventra_user", JSON.stringify({ ...user, token }));
+      // Store token or admin info in localStorage if needed
+      localStorage.setItem("organizerToken", res.data.token);
 
-      if (user.role === "organizer") navigate("/organizer/dashboard");
-      else if (user.role === "user") navigate("/user/dashboard");
-      else setError("Unknown role");
+      // Redirect to organizer dashboard
+      navigate("/organizer/dashboard");
     } catch (err) {
-      setError("Invalid email or password");
+      setError(err.response?.data?.message || "Invalid email or password");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-2 p-6 ">
+    <div className="max-w-md mx-auto mt-2 p-6">
       <h2 className="text-3xl font-bold text-center text-green-600 mb-6">
-        Login to Eventra
+        Organizer Login
       </h2>
       <form onSubmit={handleLogin} className="space-y-5">
+        {/* Email */}
         <div>
           <label className="block text-sm mb-1 text-gray-700">Email</label>
           <div className="flex items-center border rounded px-3 py-2 bg-gray-50">
             <FiMail className="text-gray-500 mr-2" />
             <input
               type="email"
-              placeholder="your@email.com"
+              placeholder="organizer@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full outline-none bg-transparent"
@@ -48,6 +54,7 @@ const OrganizerLogin = () => {
           </div>
         </div>
 
+        {/* Password */}
         <div>
           <label className="block text-sm mb-1 text-gray-700">Password</label>
           <div className="flex items-center border rounded px-3 py-2 bg-gray-50">
@@ -73,8 +80,10 @@ const OrganizerLogin = () => {
           </div>
         </div>
 
+        {/* Error */}
         {error && <p className="text-red-500 text-center text-sm">{error}</p>}
 
+        {/* Submit */}
         <button
           type="submit"
           className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
@@ -82,6 +91,7 @@ const OrganizerLogin = () => {
           Login
         </button>
       </form>
+
       <p className="text-sm text-center mt-4 text-gray-600">
         Don’t have an account?{" "}
         <span
@@ -93,6 +103,4 @@ const OrganizerLogin = () => {
       </p>
     </div>
   );
-};
-
-export default OrganizerLogin;
+}

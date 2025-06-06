@@ -3,23 +3,25 @@ import {
   FiMail,
   FiLock,
   FiUser,
-  FiUserCheck,
+  FiPhone,
   FiEye,
   FiEyeOff,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios"; // centralized axios instance
 
 const UserRegister = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
     email: "",
+    mobile: "",
     password: "",
     role: "user",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -28,18 +30,36 @@ const UserRegister = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("/api/register", form);
-      navigate("/login");
+      await api.post("/auth/register/user", form);
+
+      setError("");
+      setSuccess("Registration successful! Redirecting to login...");
+
+      setForm({
+        name: "",
+        email: "",
+        mobile: "",
+        password: "",
+        role: "user",
+      });
+
+      setTimeout(() => {
+        navigate("/user/login");
+      }, 2000);
     } catch (err) {
-      setError("Registration failed. Try again.");
+      setError(
+        err.response?.data?.message || "Registration failed. Try again."
+      );
+      setSuccess("");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-lg rounded-xl">
-      <h2 className="text-3xl font-bold text-center text-green-600 mb-6">
-        Register for Eventra
+    <div className="max-w-md mx-auto mt-2 p-6">
+      <h2 className="text-3xl font-bold text-center text-blue-600 mb-6">
+        User Register
       </h2>
+
       <form onSubmit={handleRegister} className="space-y-5">
         {/* Name */}
         <div>
@@ -75,6 +95,23 @@ const UserRegister = () => {
           </div>
         </div>
 
+        {/* Mobile */}
+        <div>
+          <label className="block text-sm mb-1 text-gray-700">Phone</label>
+          <div className="flex items-center border rounded px-3 py-2 bg-gray-50">
+            <FiPhone className="text-gray-500 mr-2" />
+            <input
+              type="tel"
+              name="mobile"
+              value={form.mobile}
+              onChange={handleChange}
+              placeholder="+91 1234567890"
+              className="w-full outline-none bg-transparent"
+              required
+            />
+          </div>
+        </div>
+
         {/* Password */}
         <div>
           <label className="block text-sm mb-1 text-gray-700">Password</label>
@@ -102,13 +139,16 @@ const UserRegister = () => {
           </div>
         </div>
 
-       
-
+        {/* Success or Error messages */}
+        {success && (
+          <p className="text-blue-600 text-center text-sm">{success}</p>
+        )}
         {error && <p className="text-red-500 text-center text-sm">{error}</p>}
 
+        {/* Submit button */}
         <button
           type="submit"
-          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
         >
           Register
         </button>
@@ -117,7 +157,7 @@ const UserRegister = () => {
       <p className="text-sm text-center mt-4 text-gray-600">
         Already have an account?{" "}
         <span
-          className="text-green-600 cursor-pointer hover:underline"
+          className="text-blue-600 cursor-pointer hover:underline"
           onClick={() => navigate("/user/login")}
         >
           Login
