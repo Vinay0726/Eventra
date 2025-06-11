@@ -22,7 +22,11 @@ export default function UserLogin({ onClose }) {
       });
 
       localStorage.setItem("userToken", res.data.token);
-
+      localStorage.setItem("userName", res.data.name);
+      localStorage.setItem("userId", res.data.id);
+    
+      localStorage.setItem("userData", JSON.stringify(res.data));
+      window.location.reload();
       // Close the modal after successful login
       if (onClose) onClose();
 

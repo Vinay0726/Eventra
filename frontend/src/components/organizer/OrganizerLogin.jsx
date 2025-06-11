@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import api from "../../api/axios"; // centralized axios instance
 
-export default function OrganizerLogin() {
+export default function OrganizerLogin({ onClose }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,10 +23,16 @@ export default function OrganizerLogin() {
       });
 
       // Store token or admin info in localStorage if needed
-      localStorage.setItem("organizerToken", res.data.token);
+      localStorage.setItem("userName", res.data.name);
+      localStorage.setItem("userId", res.data.id);
+
+      localStorage.setItem("userData", JSON.stringify(res.data));
 
       // Redirect to organizer dashboard
-      navigate("/organizer/dashboard");
+      navigate("/organizer/dashboard/home");
+      window.location.reload();
+      // Close the modal after successful login
+      if (onClose) onClose();
     } catch (err) {
       setError(err.response?.data?.message || "Invalid email or password");
     }

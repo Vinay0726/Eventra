@@ -20,9 +20,13 @@ export default function AdminLogin() {
 
       // Store token or admin info in localStorage if needed
       localStorage.setItem("adminToken", res.data.token);
+      localStorage.setItem("userName", res.data.name);
+      localStorage.setItem("userId", res.data.id);
+
+      localStorage.setItem("userData", JSON.stringify(res.data));
 
       // Redirect to admin dashboard
-      navigate("/admin/dashboard");
+      navigate("/admin/home");
     } catch (err) {
       alert(
         "Login failed: " + (err.response?.data?.message || "Unknown error")
